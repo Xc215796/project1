@@ -1,0 +1,328 @@
+<div>
+ 
+  <button type="button" class="btn btn-info addcate" >新增</button>
+  <button type="button" class="btn btn-info delcate" style='background-color: red;' >批量删除</button>
+  <div class='search'>
+    <select class="form-control" id="one">
+      <option value="">请选择</option>
+    </select>
+    <select class="form-control" id="two" style="display: none;">
+      <!-- <option value="">请选择</option> -->
+    </select>
+  </div>
+  <!-- 表格 -->
+  <div class="table">
+  <table class="table table-striped" >
+    <thead>
+      <tr>
+        <th scope="col">编号</th>
+        <th scope="col">栏目名称</th>
+        <th scope="col">父级栏目</th>
+        <th scope="col">描述</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+    </tbody>
+  </table>
+  </div>>
+   <!-- 新增模态框 -->
+ <div class="modal" tabindex="-1" role="dialog" id="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- 表单开始 -->
+        <form action="">
+          <div class="form-group row">
+            <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">栏目名称</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control form-control-sm" name="cate_name">
+            </div>
+          </div>
+          <!--//2 <div class="form-group row" style="display: none;" id="edit_css">
+            <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">ID</label>
+            <div class="col-sm-10 edit_id"> -->
+              <!-- <input type="text" class="form-control form-control-sm" name="cate_id" id="cate_id"> -->
+            <!-- </div>
+          </div> -->
+          <div class="form-group row" >
+            <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">序号</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control form-control-sm" name="cate_no">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">父栏目</label>
+            <div class="col-sm-10">
+              <select class="form-control" id="list_style" >
+                
+              
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">描述</label>
+            <div class="col-sm-10" >
+              <input type="text" class="form-control form-control-sm" name="comment">
+            </div>   
+        </form>
+        <!-- 表单关闭 -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 模态框闭 -->
+
+</div>
+<script>
+  //简便之法:取id方法也可以定义全局变量 之后直接引用就行
+  //批量删除
+  $(function(){
+    $('button:contains("批量删除")').click(function(){
+        // alert(1)
+        //取得id
+        var chk_value=[]
+        $('input[name="vehicle"]:checked').each(function(){
+          chk_value.push($(this).val())
+        })
+        // console.log(chk_value)
+        var ids
+        if(chk_value.length==1){
+          ids=chk_value[0]
+          // console.log(typeof(ids))
+        }else{
+          // ids=JSON.stringify(chk_value)
+          ids=chk_value.toString()
+          // console.log(ids)
+        }
+        $.post(baseURL+'/manager/category/batchDeleteCategory',{ids:ids},function(res){
+          loadCategory()
+        })
+      })  
+    // //修改
+      var ood
+      $('tbody').on({
+        click:function(){
+          // $('.edit_id').empty()//2
+          // $('#edit_css').css('display','none')//2
+          $('#modal').show()
+          $('.modal-title').text('修改栏目信息')
+          ood =$(this).closest('tr').find('.id').val()
+          // console.log(ood)
+          // var input=( '<input type="text" class="form-control form-control-sm" name="cate_id" id="cate_id" value="'+oid+'">')
+          // $('.edit_id').append(input)//2
+        }
+      },'.edit')
+      //修改新增保存
+      $('button:contains("保存")').click(function(){
+        $('#modal').hide()
+        // var iid=$('#cate_id').val()//2
+        var name=$('input[name=cate_name]').val()
+        var comment=$('input[name=comment]').val()
+        var no=$('input[name=cate_no]').val()
+        var parentId=$('#list_style option:selected').val()
+        var obj
+        if(ood){obj={
+          id:ood,
+          name:name,
+          no:no,
+          comment:comment,
+          parentId:parentId
+          }
+        }else{
+          obj={
+          name:name,
+          no:no,
+          comment:comment,
+          parentId:parentId
+        }
+        }
+        $.post(baseURL+'/manager/category/saveOrUpdateCategory',obj,function(res){
+          // console.log(res,"xuexue")
+          loadCategory()
+        })
+      })
+      //新增
+      $('.addcate').on({
+        click:function(){
+          ood=null
+          // $('.edit_id').empty()
+          // $('#edit_css').css('display','none')//2
+          $('#modal').show()    
+          $('.modal-title').text('新建栏目信息')
+        }
+      })
+      // //保存
+      // $('button:contains("保存")').click(function(){
+      //   $('#modal').hide()
+      //   var name=$('input[name=cate_name]').val()
+      //   var comment=$('input[name=comment]').val()
+      //   var no=$('input[name=cate_no]').val()
+      //   var obj={
+      //     name:name,
+      //     no:no,
+      //     comment:comment
+
+      //   }
+      //   $.post(baseURL+'/manager/category/saveOrUpdateCategory',obj,function(res){
+      //     // console.log(res)
+      //     loadCategory()
+      //   })
+      // })
+      //删除
+      $('tbody').on({
+        click:function(){
+          var oid =$(this).closest('tr').find('.id').val()
+          // console.log(oid,"wocaocao")
+          $.get(baseURL+'/manager/category/deleteCategoryById',{id:oid},function(res){
+            // console.log(res.data)
+            loadCategory()
+          }) 
+        }
+      },'.del')
+      //关闭模态框
+      $('button:contains("关闭")').click(function(){
+        $('#modal').hide()
+      })
+      //找文章
+    loadCategory()
+    function loadCategory(){
+      $("#list_style").empty()
+      $('tbody').empty()
+      $("#one").empty()
+
+      $.get(baseURL+ '/manager/category/findAllCategory',function(res){
+        // console.log(res.data)
+        //遍历res.data
+        res.data.forEach(function(item){
+          var parent=item.parent?item.parent.name:"--"
+          // console.log(parent)
+
+          var cate_content=(`<tr>
+        <td scope="col" ><input type="checkbox" name="vehicle" value="`+item.id+`" class='id'></td>
+        <td scope="col" >`+item.name+`</td>
+        <td scope="col" >`+parent+`</td>
+        <td scope="col" >`+item.comment+`</td>
+        <td scope="col" >
+          <button class="del">删除</button>
+          <button class="edit">修改</button>
+        </td>
+      </tr>`)
+      $('tbody').append(cate_content)
+        })
+        //过滤父栏目为空
+        var oneCategory=res.data.filter(function(item){
+          return !item.parent
+        })
+        // console.log(oneCategory)
+        oneCategory.forEach(function(item){
+          var row=$('<option value="'+item.id+'">'+item.name+'</option>')
+          $('#list_style').append(row)
+          var list=$('<option value="'+item.id+'">'+item.name+'</option>')
+          $('#one').append(list)
+          //console.log(item) 
+       // $('#list_style').append(row)
+        })
+      })
+    }
+    //监听第一个下拉框
+    $('#one').change(function(){
+      // console.log($(this).val())
+      if($(this).val()){
+        $('#two').css('display','block')
+        twoCategory($(this).val())
+      }else{
+        $('#two').css('display','none')
+      }
+    })
+    //通过一级栏目筛选二级并输出第一个栏目之后的结果
+    function twoCategory(oid){
+      $('tbody').empty()
+      $('#two').empty()
+      $.get(baseURL+'/manager/category/findCategoryByParentId',{id:oid},function(res){
+        // console.log(res.data)
+        res.data.forEach(function(item){
+          var row=$('<option value="'+item.id+'">'+item.name+'</option>')
+          $('#two').append(row)
+          var parentname=$('#one option:selected').text()
+          var cate_pcontent=(`<tr>
+            <td scope="col" ><input type="checkbox" name="vehicle" value="`+item.id+`" class='id'></td>
+        <td scope="col" >`+item.name+`</td>
+        <td scope="col" >`+parentname+`</td>
+        <td scope="col" >`+item.comment+`</td>
+        <td scope="col" >
+          <button class="del">删除</button>
+          <button class="edit">修改</button>
+        </td>
+      </tr>`)
+        $('tbody').append(cate_pcontent)
+        })
+      })
+    }
+    //监听第二个下拉框
+    $('#two').change(function(){
+      // console.log($(this).val())
+      if($(this).val()){
+        twosearch()
+      }else{
+        $('#two').css('display','none')
+      }
+    })
+     //通过二级栏目值来查询文章
+     function twosearch(){
+      var p=$("#two option:selected").text();
+          // console.log(p)
+      $('tbody').empty()
+      $.get(baseURL+'/manager/category/findCategoryByCategoryname',{name:p},function(res){
+        // console.log(res.data)
+        var item=res.data
+        var parentname=$('#one option:selected').text()
+        var cate_pcontent=(`<tr>
+        <td scope="col" ><input type="checkbox" name="vehicle" value="`+item.id+`" class='id'></td>
+        <td scope="col" >`+item.name+`</td>
+        <td scope="col" >`+parentname+`</td>
+        <td scope="col" >`+item.comment+`</td>
+        <td scope="col" >
+          <button class="del">删除</button>
+          <button class="edit">修改</button>
+        </td>
+      </tr>`)
+        $('tbody').append(cate_pcontent)
+      })
+    }
+  })
+</script>
+<style>
+  #one,#two{
+    width: 200px;
+    float: left;
+    margin: 10px;
+  }
+  .del{
+  width: 60px;
+  background-color:red;
+  color: #fff;
+  cursor: pointer;
+  }
+  .edit{
+    width: 60px;
+    background-color:teal;
+    color: #fff;
+    cursor: pointer;
+  }
+  .table{
+    max-height: 520px;
+    overflow:auto;
+  }
+</style>

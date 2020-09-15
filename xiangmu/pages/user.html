@@ -1,0 +1,352 @@
+<div class="user">
+  <div class="user_top">用户管理</div>
+  <div class="user_content">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item active" role="presentation">
+        <a class="nav-link" id="home-tab" data-toggle="tab" href="#admin"  aria-selected="true">管理员</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#editor"  aria-selected="false">编辑</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="contact-tab" data-toggle="tab" href="#vip" aria-selected="false">用户</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <!-- 管理员 -->
+      <div class="tab-pane fade in active" id="admin">
+        <button type="button" class="btn btn-info addUser" >新增</button>
+        <div class="table">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">编号</th>
+                <th scope="col">用户名</th>
+                <th scope="col">真实姓名</th>
+                <th scope="col">Email</th>
+                <th scope="col">状态</th>
+                <th scope="col">注册时间</th>
+                <th scope="col">操作 </th>
+              </tr>
+            </thead>
+            <tbody id="one">
+             
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- //编辑 -->
+      <div class="tab-pane fade" id="editor" >
+        <button type="button" class="btn btn-info addUser">新增</button>
+        <div class="table">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">编号</th>
+                <th scope="col">用户名</th>
+                <th scope="col">真实姓名</th>
+                <th scope="col">Email</th>
+                <th scope="col">状态</th>
+                <th scope="col">注册时间</th>
+                <th scope="col">操作 </th>
+              </tr>
+            </thead>
+            <tbody id="two">
+             
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- 会员 -->
+      <div class="tab-pane fade" id="vip" >
+        <button type="button" class="btn btn-info addUser" >新增</button>
+        <div class="table">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">编号</th>
+                <th scope="col">用户名</th>
+                <th scope="col">真实姓名</th>
+                <th scope="col">Email</th>
+                <th scope="col">状态</th>
+                <th scope="col">注册时间</th>
+                <th scope="col">操作 </th>
+              </tr>
+            </thead>
+            <tbody id="three">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 模态框 -->
+  <div class="modal" tabindex="-1" role="dialog" id="modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- 表单开始 -->
+          <form action="">
+            <div class="form-group row">
+              <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">用户名</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control form-control-sm" name="username">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">真实姓名</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control form-control-sm" name="nickname">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">Email</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control form-control-sm" name="email">
+              </div>
+            </div>  
+            <div class="form-group row">
+              <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">密码</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control form-control-sm" name="password">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">角色</label>
+              <div class="col-sm-10">
+                <select class="form-control" id="role" >
+                  <option value="admin">管理员</option>
+                  <option value="editor">编辑</option>
+                  <option value="user">用户</option>
+                </select>
+              </div>
+            </div>
+                  
+          </form>
+          <!-- 表单关闭 -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+          <button type="button" class="btn btn-primary">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 模态框 -->
+</div>
+
+
+
+<script>
+  $(function(){
+    //改变用户状态
+    $('tbody').on({
+      click:function(){
+        var oid=$(this).closest('tr').find('.id').text()
+        // console.log(oid)
+        var status=''
+        if($(this).text()=='禁用'){
+          status=false
+        }else{
+          status=true
+        }
+        var obj={
+          id:oid,
+          status:status
+        }
+        $.post(baseURL+'/manager/user/changeStatus',obj,function(res){
+          loadUser()
+        })
+      }
+    },'.edit')
+    //删除信息
+    $('tbody').on({
+       click:function(){
+        var oid=$(this).closest('tr').find('.id').text()
+          console.log(oid)
+          $.get(baseURL+'/manager/user/deleteUserById',{id:oid},function(res){
+            
+            loadUser()
+          })
+       }
+     },'.del')
+    //保存用户信息
+    $('button:contains("保存")').click(function(){
+      $('#modal').hide()
+      var username=$('input[name=username]').val()
+      var nickname=$('input[name=nickname]').val()
+      var password=$('input[name=password]').val()
+      var email=$('input[name=email]').val()
+      var role=$('#role').val()
+      var obj={
+        username:username,
+        nickname:nickname,
+        password:password,
+        email:email,
+        role:role
+      }
+      $.ajax({
+        url:baseURL +'/manager/user/reg',
+        method:'post',
+        data:obj,
+        success:function(res){
+          loadUser()
+        }
+
+      })
+      console.log(obj)
+    })
+    //关闭模态框
+    $('button:contains("关闭")').click(function(){
+      $('#modal').hide()
+    })
+    //新增用户
+    //显示模态框
+   $('.addUser').click(function(){
+     $('#modal').show()
+     $('.modal-title').text('新增用户')
+   })
+        //时间处理函数
+        function dateParse(dataString){
+            if(dataString){
+              let date = new Date(dataString);
+              let Y = date.getFullYear() + '-';
+              let M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+              let D = (date.getDate()< 10 ? '0'+date.getDate() : date.getDate())+' ';
+              let h = (date.getHours()< 10 ? '0'+date.getHours() : date.getHours())+ ':';
+              let m = (date.getMinutes()< 10 ? '0'+date.getMinutes() : date.getMinutes())+ ':';
+              let s = (date.getSeconds()< 10 ? '0'+date.getSeconds() : date.getSeconds());
+              return Y+M+D+h+m+s;  
+            }else{
+              return '';
+            }
+    }
+    //加载用户
+    function loadUser(){
+      $('tbody').empty()
+      $.ajax({
+      url:baseURL+'/manager/user/findAllUser',
+      method:'get',
+      success:function(res){
+        // console.log(res)
+        //管理员
+        var admin=res.data.filter(function(item){
+          return item.role=='admin'
+        })
+        console.log(admin)
+        //editor
+        var editor=res.data.filter(function(item){
+          return item.role=='editor'
+        })
+        console.log(editor)
+        //会员
+        var user=res.data.filter(function(item){
+          return item.role=='user'
+        })
+        console.log(user)
+        //遍历管理员
+        admin.forEach(function(item){
+          var status=''
+          var btn=''
+          if(item.enabled==true){
+            status='正常'
+            btn='禁用'
+          }else{
+            status='禁用'
+            btn='启用'
+          }
+          var row=$(` <tr>
+                <td scope="col" class='id'>`+item.id+`</td>
+                <td scope="col">`+item.username+`</td>
+                <td scope="col">`+item.nickname+`</td>
+                <td scope="col">`+item.email+`</td>
+                <td scope="col">`+status+`</td>
+                <td scope="col">`+dateParse(item.regtime)+`</td>
+                <td scope="col">
+                  <span class="del">删除</span>
+                  <span class="edit">`+btn+`</span>
+                 </td>
+              </tr>`)
+              $('#one').append(row)
+        })
+        //编辑
+        editor.forEach(function(item){
+          var status=''
+          var btn=''
+          if(item.enabled==true){
+            status='正常'
+            btn='禁用'
+          }else{
+            status='禁用'
+            btn='启用'
+          }
+          var row=$(` <tr>
+                <td scope="col" class='id'>`+item.id+`</td>
+                <td scope="col">`+item.username+`</td>
+                <td scope="col">`+item.nickname+`</td>
+                <td scope="col">`+item.email+`</td>
+                <td scope="col">`+status+`</td>
+                <td scope="col">`+dateParse(item.regtime)+`</td>
+                <td scope="col">
+                  <span class="del">删除</span>
+                  <span class="edit">`+btn+`</span>
+                 </td>
+              </tr>`)
+              $('#two').append(row)
+        })
+        //会员
+        user.forEach(function(item){
+          var status=''
+          var btn=''
+          if(item.enabled==true){
+            status='正常'
+            btn='禁用'
+          }else{
+            status='禁用'
+            btn='启用'
+          }
+          var row=$(` <tr>
+                <td scope="col"  class='id'>`+item.id+`</td>
+                <td scope="col">`+item.username+`</td>
+                <td scope="col">`+item.nickname+`</td>
+                <td scope="col">`+item.email+`</td>
+                <td scope="col">`+status+`</td>
+                <td scope="col">`+dateParse(item.regtime)+`</td>
+                <td scope="col">
+                  <span class="del">删除</span>
+                  <span class="edit">`+btn+`</span>
+                 </td>
+              </tr>`)
+              $('#three').append(row)
+        })
+      }
+      })
+    }
+    loadUser()
+  })
+</script>
+<style>
+.user_top{
+  /* background-color: pink; */
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+.del{
+  color:red;
+  cursor: pointer;
+}
+.edit{
+  color:green;
+  cursor: pointer;
+}
+.table{
+  max-height: 450px;
+  overflow: auto;
+}
+</style>

@@ -1,0 +1,443 @@
+
+
+<!-- <input type="text" class="form-control form-control-sm" name="comment" style="width:300px"> -->
+<nav class="navbar navbar-light bg-light">
+  <form class="form-inline" style="display: flex; justify-content: space-between">
+    <div>
+      <button type="button" class="btn btn-info addArt" >新增</button>
+      <button type="button" class="btn btn-info delArt" style='background-color: red;' >批量删除</button>
+    </div>
+    <div>
+      <input class="form-control mr-sm-2" type="search" placeholder="请输入标题或关键字" aria-label="Search" name="searchone"id="searchone">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="button" id="search_one" >搜索</button>
+      <button class="btn btn-outline-success my-2 my-sm-0" type="reset">重置</button>
+    </div>
+  </form>
+</nav>
+<!-- 表 -->
+<table class="table" >
+  <thead>
+    <tr>
+      <th scope="col">编号</th>
+      <th scope="col">文章标题</th>
+      <th scope="col">所属栏目</th>
+      <th scope="col">作者</th>
+      <th scope="col">发布时间</th>
+      <th scope="col">阅读次数</th>
+      <th scope="col">状态</th>
+      <th scope="col">操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+  </tbody>
+</table>
+<!-- 表结束 -->
+<!-- //分页 -->
+  <nav aria-label="Page navigation example" class="page_style">
+  <ul class="pagination"  > 
+    <!-- <li class="page-item">
+      <a class="page-link" href="#" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li> -->
+    <!-- <li class="page-item"><a class="page-link" href="#">1</a></li>
+    <li class="page-item"><a class="page-link" href="#">2</a></li>
+    <li class="page-item"><a class="page-link" href="#">3</a></li> -->
+    <!-- <li class="page-item">
+      <a class="page-link" href="#" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li> -->
+  </ul>
+</nav>
+ <!-- 模态框 -->
+ <div class="modal" tabindex="-1" role="dialog" id="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- 表单开始 -->
+        <form action="">
+          <!-- <div class="form-group row" style="display: none;" id="art_id">
+            <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">ID</label>
+            <div class="col-sm-10" id="edit_id">
+              
+            </div>
+          </div> //2-->
+          <div class="form-group row"  >
+            <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">列表样式</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control form-control-sm" name="liststyle">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">文章标题</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control form-control-sm" name="title">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">所属栏目</label>
+            <div class="col-sm-10">
+              <select class="form-control" id="cat_lm" >
+                
+              
+              </select>
+            </div>
+          </div>
+                
+        </form>
+        <!-- 表单关闭 -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 模态框闭 -->
+</div>
+
+
+
+
+
+
+
+<script>
+   // //解决304问题 时间戳(没有用到)
+  // var getTimestamp=new Date().getTime();
+  //简便之法:取id方法也可以定义全局变量 之后直接引用就行  //2表示起初的想法
+    $(function(){
+      $('button:contains("重置")').click(function(){
+        loadArticle(0)
+      })
+      //批量删除
+      $('button:contains("批量删除")').click(function(){
+        // alert(1)
+        //取得id
+        var chk_value=[]
+        $('input[name="vehicle"]:checked').each(function(){
+          chk_value.push($(this).val())
+        })
+        // console.log(chk_value)
+        var ids
+        if(chk_value.length==1){
+          ids=chk_value[0]
+          // console.log(typeof(ids))
+        }else{
+          // ids=JSON.stringify(chk_value)
+          ids=chk_value.toString()
+          // console.log(ids)
+        }
+        $.post(baseURL+'/manager/article/batchDeleteArticle',{ids:ids},function(res){
+          loadArticle(0)
+        })
+      })
+       //搜索(自己封装了一下 仍然没有解决页面要跳转的问题)
+     $('button:contains("搜索")').click(function(){
+        $('.page_style').css('display','none')
+        $('tbody').empty()
+        onesearch()
+        // return false;//如果属性有默认行为，必须有返回值例如 button type:submit
+      })
+      
+     //通过关键字搜索(有问题)
+     function onesearch(){
+        var keywords=$('input[name=searchone]').val()
+        var obj={
+          keywords:keywords,
+          page:0,
+          pageSize:total
+        }
+        $.get(baseURL+'/manager/article/findArticle',obj,function(res){
+          // alert(0)
+          // console.log(res.data.list)
+          var article=res.data.list 
+          article.forEach(function(item){
+        
+          var category=item.category?item.category.name:''
+          var art=$(` <tr>
+                <td scope="col"><input type="checkbox" name="vehicle" value="`+item.id+`" class='id'></td>
+                <td scope="col">`+item.title+`</td>
+                <td scope="col">`+category+`</td>
+                <td scope="col">`+item.author+`</td>
+                <td scope="col">`+item.publishtime+`</td>
+                <td scope="col">`+item.readtimes+`</td>
+                <td scope="col" class='status'>`+(item.status=='审核通过'?item.status:'<button class="_status">审核</button>')+`</td>
+                <td scope="col">
+                  <button class="del">删除</button>
+                  <button class="edit">修改</button>
+                 </td>
+              </tr>`)
+              $('tbody').append(art)
+              var list=$('<option value="'+item.id+'">'+category+'</option>')
+              $('#list_style').append(list)
+          })
+        })
+     }
+      //修改
+      var oid //定义全局变量
+      $('tbody').on({
+       click:function(){
+        //  alert(1)
+        // $('#edit_id').empty()//2清空
+        oid =$(this).closest('tr').find('.id').val()//有问题
+        // console.log(oid)
+        // $('#art_id').css('display','none')//2
+        $('#modal').show()
+        $('.modal-title').text('修改信息')
+        // var row=('<input type="text" value="'+oid+'" class="form-control form-control-sm" name="ID" id="edit_iid">')
+        // $('#edit_id').append(row)//2
+       }
+     },'.edit')
+    //  //修改保存文章信息
+    // $('button:contains("保存")').click(function(){
+    //   $('#modal').hide()
+    //   var oid=$('#edit_iid').val()
+    //   var title=$('input[name=title]').val()
+    //   var liststyle=$('input[name=liststyle]').val()
+    //   var obj={
+    //     id:oid,
+    //     title:title,
+    //     liststyle:liststyle
+    //   }
+    //   $.ajax({
+    //     url:baseURL +'/manager/article/saveOrUpdateArticle',
+    //     method:'post',
+    //     data:obj,
+    //     success:function(res){
+    //       loadArticle(0)
+    //     }
+    //   })
+    // })
+     //新增
+     $('.addArt').on({
+        click:function(){
+          oid=null
+          // $('#edit_id').empty()//2清空
+          // $('#art_id').css('display','none')//2
+          $('#modal').show()
+          $('.modal-title').text('发布文章')
+        }
+      })
+    //新增修改保存文章信息
+    $('button:contains("保存")').click(function(){
+      $('#modal').hide()
+      var title=$('input[name=title]').val()
+      var liststyle=$('input[name=liststyle]').val()
+      // var oid=$('#edit_iid').val()//2
+      var categoryId=$('#cat_lm option:selected').val()
+      // console.log(categoryId)
+      var obj
+      if(oid){
+        obj={
+          id:oid,
+          title:title,
+          liststyle:liststyle,
+          categoryId:categoryId
+        }
+      }else{
+        obj={
+          title:title,
+          liststyle:liststyle,
+          categoryId:categoryId
+        }
+      }
+      // console.log(obj)
+      $.ajax({
+        url:baseURL +'/manager/article/saveOrUpdateArticle',
+        method:'post',
+        data:obj,
+        success:function(res){
+        
+          loadArticle(0)
+        }
+
+      })
+    })
+    //关闭模态框
+    $('button:contains("关闭")').click(function(){
+      $('#modal').hide()
+    })
+     
+ //改变用户状态
+      $('tbody').on({
+        click:function(){
+          
+          var oiiid=$(this).closest('tr').find('.id').val()//有问题
+          // console.log(oiiid,"lllll")
+          var status=''
+          // console.log($(this).text())
+          // console.log(status,"liurui")
+          var obj={
+            id:oiiid,
+            status:"审核通过"
+          }
+          $.get(baseURL+'/manager/article/checkArticle',obj,function(res){
+            // console.log(res,"xuexue")
+            // if(res.status==200){
+            //   res.status='审核通过'
+            // }
+            loadArticle(0)//找一个方式来重新加载到本页
+          })
+        }
+      },'._status')
+     //删除信息
+     $('tbody').on({
+       click:function(){
+        // var oiid=$(this).closest('tr').find('.id').val()//有问题
+          var oid =$(this).closest('tr').find('.id').val()
+          // console.log(oid,"dd")
+          $.get(baseURL+'/manager/article/deleteArticleById',{id:oid},function(res){
+            loadArticle(0)
+          })
+       }
+     },'.del')
+      // var str
+      // var page
+      // $('li').on({
+      //   click:function(){
+      //     var oli=$(this).find('.page-link').text()
+      //     // console.log(oli)
+      //     if(oli==1){
+      //       page=0;
+      //     }else if(oli==2){
+      //       page=1;
+      //     }else if(oli==3){
+      //       page=2;
+      //     }
+      //     console.log(page)
+      //     str="page"+"="+page+"&"+"pageSize=14"
+      //     console.log(str)
+      //     loadArticle()
+      //   }
+      // },'.page-item')
+    //   function loadArticle(){
+    //      $('tbody').empty()
+    //     $.ajax({
+    //     url:baseURL +'/manager/article/findArticle?'+str,
+    //     method:'get',
+    //     success:function(res){
+    //       // console.log(res.data.list)
+    //       var article=res.data.list
+    //       article.forEach(function(item){
+    //         var art=$(` <tr>
+    //             <td scope="col" >`+item.id+`</td>
+    //             <td scope="col">`+item.title+`</td>
+    //             <td scope="col">`+item.author+`</td>
+    //             <td scope="col">`+item.readtimes+`</td>
+    //             <td scope="col">`+item.status+`</td>
+    //             <td scope="col">`+dateParse(item.commenttime)+`</td>
+    //             <td scope="col">
+    //               <span class="del">删除</span>
+    //               <span class="edit">修改</span>
+    //              </td>
+    //           </tr>`)
+    //           $('tbody').append(art)
+    //       })
+    //     }
+        
+    //   })
+    // }
+    // loadArticle()
+    // })
+//分页
+    var pageSize=10
+    var page
+    var total
+    loadArticle(0)
+    function loadArticle(page){
+      loadCategory()
+      $('.pagination').empty()  
+      $('tbody').empty()
+      var obj={
+        page:page,
+        pageSize:pageSize
+      }
+      $.get(baseURL+'/manager/article/findArticle',obj,function(res){
+        // console.log(res.data.list)
+        total=res.data.total
+        // console.log(total)
+        var count=Math.ceil(total/pageSize)
+        for(var i=1;i<=count;i++){
+          var row=$('<li class="page-item"><a class="page-link" href="#">'+i+'</a></li>')
+          $(`.pagination`).append(row)
+        }
+        var article=res.data.list 
+        article.forEach(function(item){
+          var category=item.category?item.category.name:''
+          var art=$(` <tr>
+                <td scope="col"><input type="checkbox" name="vehicle" value="`+item.id+`" class='id'></td>
+                <td scope="col">`+item.title+`</td>
+                <td scope="col">`+category+`</td>
+                <td scope="col">`+item.author+`</td>
+                <td scope="col">`+item.publishtime+`</td>
+                <td scope="col">`+item.readtimes+`</td>
+                <td scope="col" class='status'>`+(item.status=='审核通过'?item.status:'<button class="_status">审核</button>')+`</td>
+                <td scope="col">
+                  <button class="del">删除</button>
+                  <button class="edit">修改</button>
+                 </td>
+              </tr>`)
+              $('tbody').append(art)
+          var list=$('<option value="'+item.id+'">'+category+'</option>')
+              $('#list_style').append(list)
+          })
+      })
+    }
+    $('.pagination').on({
+        click:function(){
+          page=$(this).text()-1
+          // console.log(oli)
+          loadArticle(page)
+        }
+      },'.page-item')
+    //加载栏目
+    
+    function loadCategory(){
+          $.get(baseURL+'/manager/category/findAllCategory',function(res){
+              // console.log(res.data,"xuexue")
+              var category=res.data
+              category.forEach(function(item){
+                  var row=('<option value="'+item.id+'" id="cate_val">'+item.name+'</option>')
+                  $('#cat_lm').append(row)
+            })
+          })
+        }
+     
+    })
+   
+
+</script>
+<style>
+  .del{
+  width: 60px;
+  background-color:red;
+  color: #fff;
+  cursor: pointer;
+  }
+  .edit{
+    width: 60px;
+    background-color:teal;
+    color: #fff;
+    cursor: pointer;
+  }
+  ._status{
+    width: 50px;
+    background-color:rgb(145, 218, 218);
+    color: #fff;
+    cursor: pointer;
+  }
+  #search_one{
+    background-color:darkseagreen;
+    color: azure;
+  }
+</style>
